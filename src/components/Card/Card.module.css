@@ -1,0 +1,51 @@
+.card {
+  display: block;
+  width: 120px;
+  user-select: none;
+  border-radius: 5px;
+  border: 2px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+  transition: 100ms;
+  background-color: #ebb5b5;
+}
+
+.card.display {
+  background-color: #eeeeee;
+}
+
+.card.display:hover {
+  box-shadow: 0 0 5px 2px rgba(0, 110, 255, 0.692);
+}
+
+.card.selected {
+  background-color: #c2d4e2 !important;
+}
+
+.cardInner {
+  height: 0;
+  padding-top: 150%;
+}
+
+.content {
+  padding: 0.5em;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.text {
+  font-size: 1.25em;
+  font-weight: bold;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.red {
+  color: red;
+}
+

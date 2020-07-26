@@ -1,0 +1,124 @@
+.ui {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: auto;
+  background-color: var(--bg);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px 2px rgba(0, 0, 0, 0.35);
+}
+
+.game {
+  flex: 1;
+  padding: 1em;
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+}
+
+.column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.holder {
+  width: 120px;
+  background-color: #8d9983;
+  border: 2px solid #30312e;
+  border-radius: 5px;
+  cursor: grab;
+}
+
+.holderInner {
+  height: 0;
+  padding-top: 150%;
+}
+
+.holderWrapper {
+  height: 0;
+  position: relative;
+}
+
+.cardWrapper {
+  height: 10px;
+}
+
+.cardWrapper.display {
+  height: 50px;
+}
+
+.horizenWrapper {
+  width: 30px;
+}
+
+.cardStack {
+  display: flex;
+}
+
+.control {
+  display: flex;
+  padding: 1em;
+}
+
+.btn {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 1em;
+  font-size: 1.5em;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+}
+
+.chooseList {
+  font-size: 1.25em;
+  font-weight: bold;
+  position: absolute;
+  z-index: 100;
+  border: 2px solid #555555;
+  border-radius: 5px;
+  background-color: #2e2e2e;
+  padding: 0.5em 0;
+  color: #ffffff;
+}
+
+.chooseList div {
+  padding: 0.5em 1em;
+  user-select: none;
+  cursor: pointer;
+}
+
+.chooseList div:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.details[open] summary {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.score {
+  display: flex;
+  align-items: center;
+  font-size: 1.5em;
+  color: #ffffff;
+  padding: 1em;
+  font-weight: bold;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
