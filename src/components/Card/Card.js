@@ -7,6 +7,7 @@ const Card = (props) => {
   const { point, suit, onClick, onOutsideClick } = props;
   const display = props.display || false;
   const selected = props.selected || false;
+  const flash = props.flash || false;
 
   const isRed = suit === "♥" || suit === "♦";
 
@@ -26,6 +27,7 @@ const Card = (props) => {
         className={classnames(styles.card, {
           [styles.display]: display,
           [styles.selected]: selected,
+          [styles.flash]: flash,
         })}
       >
         <div className={styles.cardInner}></div>

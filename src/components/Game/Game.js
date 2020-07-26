@@ -3,7 +3,7 @@ import OutsideClickHandler from "react-outside-click-handler";
 import classnames from "classnames";
 import Card from "components/Card";
 import styles from "./Game.module.css";
-import { ALL_POINTS, POINTS_MAP } from "./contants";
+import { ALL_POINTS, POINTS_MAP, pointLess } from "./contants";
 
 const SUITS_NUM = 2;
 
@@ -79,52 +79,14 @@ const getInitGameState = (mode) => {
       cardsT[i].push(card);
     }
   }
-
-  /* DEBUG START */
-  // cardsT[0] = [
-  //   {
-  //     index: 999,
-  //     point: "A",
-  //     suit: "♠",
-  //     display: true,
-  //   },
-  // ];
-  // for (let i = 12; i > 3; i--) {
-  //   cardsT[0].push({
-  //     index: lastIndex++,
-  //     point: ALL_POINTS[i],
-  //     suit: "♠",
-  //     display: true,
-  //   });
-  // }
-  // for (let i = 3; i >= 0; i--) {
-  //   cardsT[1].push({
-  //     index: lastIndex++,
-  //     point: ALL_POINTS[i],
-  //     suit: "♠",
-  //     display: true,
-  //   });
-  // }
-  // for (let i = 12; i >= 1; i--) {
-  //   cardsT[2].push({
-  //     index: lastIndex++,
-  //     point: ALL_POINTS[i],
-  //     suit: "♥",
-  //     display: true,
-  //   });
-  // }
-  // cardsT[3].push({
-  //   index: lastIndex++,
-  //   point: ALL_POINTS[0],
-  //   suit: "♥",
-  //   display: true,
-  // });
-  /* DEBUG END */
   return [cardsT, allCardsT];
 };
 
 const Game = () => {
   const [allCards, setAllCards] = useState([]);
+  const [hintDestCard, setHintDestCard] = useState(null);
+  const [hints, setHints] = useState([]);
+  const [hintIndex, setHintIndex] = useState(0);
   const [score, setScore] = useState(500);
   const [menuOpen, setMenuOpen] = useState(false);
   const [finishedCards, setFinishedCards] = useState([]);
@@ -149,6 +111,10 @@ const Game = () => {
 
   useEffect(() => {
     window.localStorage.setItem("cards", JSON.stringify(cards));
+
+    setHints(genHints());
+    setHintIndex(0);
+    setHintDestCard(null);
   }, [cards]);
 
   useEffect(() => {
@@ -337,6 +303,75 @@ const Game = () => {
     setHistory([...history, { type: "deal" }]);
   };
 
+  const genHints = () => {
+    let hintsT = [];
+    for (let i = 0; i < 10; i++) {
+      if (cards[i].length === 0) {
+      } else {
+        let card = cards[i][cards[i].length - 1];
+        for (let j = 0; j < 10; j++) {
+          if (i === j || cards[j].length === 0) continue;
+          let row = cards[j].length - 1;
+          let { suit, point } = cards[j][row];
+          while (
+            row >= 0 &&
+            cards[j][row].display &&
+            suit === cards[j][row].suit &&
+            point === cards[j][row].point &&
+            pointLess(point, card.point)
+          ) {
+            point = getPrevPoint(point);
+            row--;
+          }
+          if (row + 1 >= cards[j].length) continue;
+          if (cards[j][row + 1].point === getNextPoint(card.point)) {
+            let hintsItem = {
+              src: j,
+              srcRow: row + 1,
+              dest: i,
+              priority: 2,
+            };
+            if (
+              row >= 0 &&
+              cards[j][row].display &&
+              cards[j][row].point === getPrevPoint(cards[j][row + 1].point)
+            ) {
+              hintsItem.priority = 1;
+            }
+            if (cards[j][row + 1].suit === card.suit) {
+              hintsItem.priority += 1;
+            }
+            hintsT.push(hintsItem);
+          }
+        }
+      }
+    }
+    hintsT.sort((a, b) => {
+      if (a.priority > b.priority) {
+        return -1;
+      } else if (a.priority < b.priority) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    return hintsT;
+  };
+
+  /**
+   * 提示
+   */
+  const hint = () => {
+    if (hints.length > 0) {
+      setSelectedCard({
+        col: hints[hintIndex].src,
+        row: hints[hintIndex].srcRow,
+      });
+      setHintDestCard(hints[hintIndex].dest);
+      setHintIndex((hintIndex + 1) % hints.length);
+    }
+  };
+
   /**
    * 撤销
    */
@@ -411,7 +446,9 @@ const Game = () => {
             <div onClick={() => restart(1)}>容易(一个花色)</div>
           </div>
         </details>
-        <span className={styles.btn}>提示</span>
+        <span className={styles.btn} onClick={hint}>
+          提示
+        </span>
         <div className="spacer"></div>
         <div className={styles.score}>分数:{score}</div>
       </div>
@@ -439,6 +476,9 @@ const Game = () => {
                       point={point}
                       suit={suit}
                       display={display}
+                      flash={
+                        hintDestCard === colIndex && rowIndex === col.length - 1
+                      }
                       selected={
                         selectedCard &&
                         rowIndex >= selectedCard.row &&
