@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import OutsideClickHandler from "react-outside-click-handler";
+import { HotKeys } from "react-hotkeys";
 import classnames from "classnames";
 import Card from "components/Card";
 import styles from "./Game.module.css";
 import { ALL_POINTS, POINTS_MAP, pointLess } from "./contants";
 
 const SUITS_NUM = 2;
+
+const keyMap = {
+  HINT: "h",
+  UNDO: "ctrl+z",
+};
 
 const getGameData = () => {
   const cards = window.localStorage.getItem("cards");
@@ -303,6 +309,9 @@ const Game = () => {
     setHistory([...history, { type: "deal" }]);
   };
 
+  /**
+   * 生成提示
+   */
   const genHints = () => {
     let hintsT = [];
     for (let i = 0; i < 10; i++) {
@@ -395,6 +404,7 @@ const Game = () => {
         ];
         forceMove(latest.dest, latest.src, latest.num);
         setFinishedCards(finishedCards.slice(0, finishedLen - 13));
+        setScore(score - 100);
       } else if (latest.type === "deal") {
         for (let i = 9; i >= 0; i--) {
           let card = cards[i].pop();
@@ -428,94 +438,108 @@ const Game = () => {
     setMenuOpen(!menuOpen);
   };
 
+  const keyHandlers = {
+    HINT: hint,
+    UNDO: undo,
+  };
+
   return (
-    <div className={styles.ui}>
-      <div className={styles.topbar}>
-        <span className={styles.btn} onClick={undo}>
-          撤销
-        </span>
-        <details className={styles.details} open={menuOpen}>
-          <summary onClick={handleMenuClick}>
-            <OutsideClickHandler onOutsideClick={() => setMenuOpen(false)}>
-              <div className={styles.btn}>重玩</div>
-            </OutsideClickHandler>
-          </summary>
-          <div className={styles.chooseList}>
-            <div onClick={() => restart(3)}>困难(四个花色)</div>
-            <div onClick={() => restart(2)}>中等(两个花色)</div>
-            <div onClick={() => restart(1)}>容易(一个花色)</div>
-          </div>
-        </details>
-        <span className={styles.btn} onClick={hint}>
-          提示
-        </span>
-        <div className="spacer"></div>
-        <div className={styles.score}>分数:{score}</div>
-      </div>
-      <div className={styles.game}>
-        {cards.map((col, colIndex) => {
-          return (
-            <div className={styles.column} key={colIndex}>
-              <div className={styles.holderWrapper}>
-                <div
-                  className={styles.holder}
-                  onClick={(e) => select(colIndex, 0, true, e)}
-                >
-                  <div className={styles.holderInner}></div>
-                </div>
-              </div>
-              {col.map(({ point, suit, display, index }, rowIndex) => {
-                return (
+    <HotKeys handlers={keyHandlers} keyMap={keyMap} allowChanges={true}>
+      <div className={styles.ui}>
+        <div className={styles.topbar}>
+          <span className={styles.btn} onClick={undo}>
+            撤销
+          </span>
+          <details className={styles.details} open={menuOpen}>
+            <summary onClick={handleMenuClick}>
+              <OutsideClickHandler onOutsideClick={() => setMenuOpen(false)}>
+                <div className={styles.btn}>重玩</div>
+              </OutsideClickHandler>
+            </summary>
+            <div className={styles.chooseList}>
+              <div onClick={() => restart(3)}>困难(四个花色)</div>
+              <div onClick={() => restart(2)}>中等(两个花色)</div>
+              <div onClick={() => restart(1)}>容易(一个花色)</div>
+            </div>
+          </details>
+          <span className={styles.btn} onClick={hint}>
+            提示
+          </span>
+          <div className="spacer"></div>
+          <div className={styles.score}>分数:{score}</div>
+        </div>
+        <div className={styles.game}>
+          {cards.map((col, colIndex) => {
+            return (
+              <div className={styles.column} key={colIndex}>
+                <div className={styles.holderWrapper}>
                   <div
-                    key={index}
-                    className={classnames(styles.cardWrapper, {
-                      [styles.display]: display,
-                    })}
+                    className={styles.holder}
+                    onClick={(e) => select(colIndex, 0, true, e)}
                   >
+                    <div className={styles.holderInner}></div>
+                  </div>
+                </div>
+                {col.map(({ point, suit, display, index }, rowIndex) => {
+                  return (
+                    <div
+                      key={index}
+                      className={classnames(styles.cardWrapper, {
+                        [styles.display]: display,
+                      })}
+                    >
+                      <Card
+                        point={point}
+                        suit={suit}
+                        display={display}
+                        flash={
+                          hintDestCard === colIndex &&
+                          rowIndex === col.length - 1
+                        }
+                        selected={
+                          selectedCard &&
+                          rowIndex >= selectedCard.row &&
+                          colIndex === selectedCard.col
+                        }
+                        onClick={(e) => select(colIndex, rowIndex, display, e)}
+                        // onOutsideClick={() => setSelectedCard(null)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+        <div className={styles.control}>
+          <div className={styles.cardStack}>
+            {[...Array(Math.floor(finishedCards.length / 13)).keys()].map(
+              (i) => {
+                return (
+                  <div className={styles.horizenWrapper} key={i}>
                     <Card
-                      point={point}
-                      suit={suit}
-                      display={display}
-                      flash={
-                        hintDestCard === colIndex && rowIndex === col.length - 1
-                      }
-                      selected={
-                        selectedCard &&
-                        rowIndex >= selectedCard.row &&
-                        colIndex === selectedCard.col
-                      }
-                      onClick={(e) => select(colIndex, rowIndex, display, e)}
-                      // onOutsideClick={() => setSelectedCard(null)}
+                      point={"K"}
+                      suit={finishedCards[i * 13].suit}
+                      display
                     />
                   </div>
                 );
-              })}
-            </div>
-          );
-        })}
-      </div>
-      <div className={styles.control}>
-        <div className={styles.cardStack}>
-          {[...Array(Math.floor(finishedCards.length / 13)).keys()].map((i) => {
-            return (
-              <div className={styles.horizenWrapper} key={i}>
-                <Card point={"K"} suit={finishedCards[i * 13].suit} display />
-              </div>
-            );
-          })}
-        </div>
-        <div className="spacer"></div>
-        <div className={classnames(styles.cardStack, "rotated")}>
-          {[...Array(Math.floor(allCards.length / 10)).keys()].map((i) => {
-            return (
-              <div className={styles.horizenWrapper} key={i}>
-                <Card point={"A"} suit={"♠"} onClick={moreCards} />
-              </div>
-            );
-          })}
+              }
+            )}
+          </div>
+          <div className="spacer"></div>
+          <div className={classnames(styles.cardStack, "rotated")}>
+            {[...Array(Math.floor(allCards.length / 10)).keys()].map((i) => {
+              return (
+                <div className={styles.horizenWrapper} key={i}>
+                  <Card point={"A"} suit={"♠"} onClick={moreCards} />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
+    </HotKeys>
   );
 };
 
