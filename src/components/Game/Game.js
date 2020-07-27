@@ -8,11 +8,17 @@ import { ALL_POINTS, POINTS_MAP, pointLess } from "./contants";
 
 const SUITS_NUM = 2;
 
+/**
+ * 快捷键KeyMap
+ */
 const keyMap = {
   HINT: "h",
   UNDO: "ctrl+z",
 };
 
+/**
+ * 获取历史游戏记录
+ */
 const getGameData = () => {
   const cards = window.localStorage.getItem("cards");
   const allCards = window.localStorage.getItem("allCards");
@@ -33,20 +39,36 @@ const getGameData = () => {
   }
 };
 
+/**
+ * 打乱一个数组
+ * @param {Array} arr 要打乱的数组
+ */
 const shuffle = (arr) => {
   arr.sort(() => Math.random() - 0.5);
 };
 
+/**
+ * 获取比point小一点的点数
+ * @param {number} point 点数
+ */
 const getNextPoint = (point) => {
   if (POINTS_MAP[point] - 1 < 0) return "-1";
   return ALL_POINTS[POINTS_MAP[point] - 1];
 };
 
+/**
+ * 获取比point大一点的点数
+ * @param {number} point 点数
+ */
 const getPrevPoint = (point) => {
   if (POINTS_MAP[point] + 1 > 12) return "-1";
   return ALL_POINTS[POINTS_MAP[point] + 1];
 };
 
+/**
+ * 获取一个随机的牌堆开始游戏
+ * @param {number} mode 难度模式
+ */
 const getInitGameState = (mode) => {
   let ALL_SUITS;
   if (mode === 3) {
@@ -139,6 +161,10 @@ const Game = () => {
     window.localStorage.setItem("finishedCards", JSON.stringify(finishedCards));
   }, [finishedCards]);
 
+  /**
+   * 重新开始
+   * @param {number} mode 难度模式
+   */
   const restart = (mode) => {
     const [cardsT, allCardsT] = getInitGameState(mode);
     setAllCards(allCardsT);
@@ -239,6 +265,7 @@ const Game = () => {
   const canMoveFrom = (col, row) => {
     let len = cards[col].length;
     let movedCards = cards[col].slice(row, len);
+    if (movedCards.length <= 0) return false;
     let suit = movedCards[0].suit;
     let point = movedCards[0].point;
     for (let c of movedCards) {
@@ -268,8 +295,8 @@ const Game = () => {
   /**
    * 检查移动的牌堆是否能和movedCards消除
    * 注意本函数有可能返回0,在判断此函数结果的时候要使用`!== false`
-   * @param {number} dest
-   * @param {Array} movedCards
+   * @param {number} dest 目标
+   * @param {Array} movedCards 将要移动的牌堆
    */
   const canMerge = (dest, movedCards) => {
     // 移动的牌堆没有到A直接返回false
@@ -414,12 +441,13 @@ const Game = () => {
           setCards([...cards]);
         }
       }
+      setHistory([...history]);
       setScore(score - 1);
     }
   };
 
   /**
-   *
+   * 强制移动,会在内部调用setCards函数
    * @param {number} src 开始列数
    * @param {number} dest 结束列数
    * @param {number} num 数量
@@ -433,11 +461,18 @@ const Game = () => {
     setCards([...cards]);
   };
 
+  /**
+   * 难度选择handler
+   * @param {Event} e 事件
+   */
   const handleMenuClick = (e) => {
     e.preventDefault();
     setMenuOpen(!menuOpen);
   };
 
+  /**
+   * 快捷键handlers
+   */
   const keyHandlers = {
     HINT: hint,
     UNDO: undo,

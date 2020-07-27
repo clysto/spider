@@ -20,10 +20,12 @@ code {
 
 details summary::-webkit-details-marker {
   display: none;
+  content: "";
 }
 
-details summary::-moz-details-marker {
+details summary::marker {
   display: none;
+  content: "";
 }
 
 summary {
