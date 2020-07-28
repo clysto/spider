@@ -7,24 +7,26 @@
   position: relative;
   overflow: hidden;
   cursor: grab;
-  transition: 100ms;
+  transition: box-shadow 100ms;
   background-color: #ebb5b5;
 }
 
 .card.display {
   background-color: #eeeeee;
+  background-image: none;
 }
 
 .card.flash {
-  box-shadow: 0 0 5px 5px rgba(0, 255, 149, 0.692) !important;
+  box-shadow: 0 0 5px 5px rgba(255, 238, 0, 0.548);
 }
 
-.card.display:hover {
-  box-shadow: 0 0 5px 5px rgba(0, 110, 255, 0.493);
+.card.flashSrc {
+  box-shadow: 0 0 5px 5px rgba(0, 255, 149, 0.692);
 }
 
 .card.selected {
   background-color: #c2d4e2 !important;
+  pointer-events: none;
 }
 
 .cardInner {
@@ -33,7 +35,7 @@
 }
 
 .content {
-  padding: 0.5em;
+  padding: 0.8em;
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -43,13 +45,12 @@
 }
 
 .text {
-  font-size: 1.25em;
+  display: flex;
+  font-size: 1.5em;
   font-weight: bold;
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: "Oleo Script", cursive;
 }
 
 .red {
   color: red;
 }
-

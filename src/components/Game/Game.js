@@ -110,9 +110,69 @@ const getInitGameState = (mode) => {
   return [cardsT, allCardsT];
 };
 
+/**
+ * 根据当前的局面生成提示
+ * @param {Array} cards 所有的牌
+ */
+const genHints = (cards) => {
+  let hintsT = [];
+  for (let i = 0; i < 10; i++) {
+    if (cards[i].length === 0) {
+    } else {
+      let card = cards[i][cards[i].length - 1];
+      for (let j = 0; j < 10; j++) {
+        if (i === j || cards[j].length === 0) continue;
+        let row = cards[j].length - 1;
+        let { suit, point } = cards[j][row];
+        while (
+          row >= 0 &&
+          cards[j][row].display &&
+          suit === cards[j][row].suit &&
+          point === cards[j][row].point &&
+          pointLess(point, card.point)
+        ) {
+          point = getPrevPoint(point);
+          row--;
+        }
+        if (row + 1 >= cards[j].length) continue;
+        if (cards[j][row + 1].point === getNextPoint(card.point)) {
+          let hintsItem = {
+            src: j,
+            srcRow: row + 1,
+            dest: i,
+            priority: 2,
+          };
+          if (
+            row >= 0 &&
+            cards[j][row].display &&
+            cards[j][row].point === getPrevPoint(cards[j][row + 1].point)
+          ) {
+            hintsItem.priority = 1;
+          }
+          if (cards[j][row + 1].suit === card.suit) {
+            hintsItem.priority += 1;
+          }
+          hintsT.push(hintsItem);
+        }
+      }
+    }
+  }
+  hintsT.sort((a, b) => {
+    if (a.priority > b.priority) {
+      return -1;
+    } else if (a.priority < b.priority) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+  return hintsT;
+};
+
 const Game = () => {
   const [allCards, setAllCards] = useState([]);
   const [hintDestCard, setHintDestCard] = useState(null);
+  const [hintSrcCard, setHintSrcCard] = useState(null);
   const [hints, setHints] = useState([]);
   const [hintIndex, setHintIndex] = useState(0);
   const [score, setScore] = useState(500);
@@ -140,9 +200,10 @@ const Game = () => {
   useEffect(() => {
     window.localStorage.setItem("cards", JSON.stringify(cards));
 
-    setHints(genHints());
+    setHints(genHints(cards));
     setHintIndex(0);
     setHintDestCard(null);
+    setHintSrcCard(null);
   }, [cards]);
 
   useEffect(() => {
@@ -183,23 +244,24 @@ const Game = () => {
    * @param {string} eventCardDisplay 触发事件牌的display属性
    * @param {object} event 触发事件
    */
-  const select = (col, row, eventCardDisplay) => {
+  const select = (col, row, eventCardDisplay, x, y) => {
     // 选中的牌是背面朝上的牌直接返回
     if (!eventCardDisplay) return;
     if (selectedCard === null && canMoveFrom(col, row)) {
-      setSelectedCard({ col, row });
-    } else if (
-      selectedCard !== null &&
-      selectedCard.col !== col &&
-      canMoveTo(col, cards[selectedCard.col][selectedCard.row].point)
-    ) {
-      move(selectedCard.col, col, selectedCard.row);
-      setSelectedCard(null);
-    } else if (canMoveFrom(col, row)) {
-      setSelectedCard({ col, row });
-    } else {
-      setSelectedCard(null);
+      setSelectedCard({ col, row, pos: { x, y } });
     }
+    // else if (
+    //   selectedCard !== null &&
+    //   selectedCard.col !== col &&
+    //   canMoveTo(col, cards[selectedCard.col][selectedCard.row].point)
+    // ) {
+    //   move(selectedCard.col, col, selectedCard.row);
+    //   setSelectedCard(null);
+    // } else if (canMoveFrom(col, row)) {
+    //   setSelectedCard({ col, row, pos: { x, y } });
+    // } else {
+    //   setSelectedCard(null);
+    // }
   };
 
   /**
@@ -337,69 +399,15 @@ const Game = () => {
   };
 
   /**
-   * 生成提示
-   */
-  const genHints = () => {
-    let hintsT = [];
-    for (let i = 0; i < 10; i++) {
-      if (cards[i].length === 0) {
-      } else {
-        let card = cards[i][cards[i].length - 1];
-        for (let j = 0; j < 10; j++) {
-          if (i === j || cards[j].length === 0) continue;
-          let row = cards[j].length - 1;
-          let { suit, point } = cards[j][row];
-          while (
-            row >= 0 &&
-            cards[j][row].display &&
-            suit === cards[j][row].suit &&
-            point === cards[j][row].point &&
-            pointLess(point, card.point)
-          ) {
-            point = getPrevPoint(point);
-            row--;
-          }
-          if (row + 1 >= cards[j].length) continue;
-          if (cards[j][row + 1].point === getNextPoint(card.point)) {
-            let hintsItem = {
-              src: j,
-              srcRow: row + 1,
-              dest: i,
-              priority: 2,
-            };
-            if (
-              row >= 0 &&
-              cards[j][row].display &&
-              cards[j][row].point === getPrevPoint(cards[j][row + 1].point)
-            ) {
-              hintsItem.priority = 1;
-            }
-            if (cards[j][row + 1].suit === card.suit) {
-              hintsItem.priority += 1;
-            }
-            hintsT.push(hintsItem);
-          }
-        }
-      }
-    }
-    hintsT.sort((a, b) => {
-      if (a.priority > b.priority) {
-        return -1;
-      } else if (a.priority < b.priority) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
-    return hintsT;
-  };
-
-  /**
    * 提示
    */
   const hint = () => {
     if (hints.length > 0) {
-      setSelectedCard({
+      // setSelectedCard({
+      //   col: hints[hintIndex].src,
+      //   row: hints[hintIndex].srcRow,
+      // });
+      setHintSrcCard({
         col: hints[hintIndex].src,
         row: hints[hintIndex].srcRow,
       });
@@ -478,6 +486,18 @@ const Game = () => {
     UNDO: undo,
   };
 
+  const handleCardMouseUp = (col, row, eventCardDisplay) => {
+    if (
+      eventCardDisplay &&
+      selectedCard &&
+      selectedCard.col !== col &&
+      canMoveTo(col, cards[selectedCard.col][selectedCard.row].point)
+    ) {
+      move(selectedCard.col, col, selectedCard.row);
+      setSelectedCard(null);
+    }
+  };
+
   return (
     <HotKeys handlers={keyHandlers} keyMap={keyMap} allowChanges={true}>
       <div className={styles.ui}>
@@ -510,7 +530,8 @@ const Game = () => {
                 <div className={styles.holderWrapper}>
                   <div
                     className={styles.holder}
-                    onClick={(e) => select(colIndex, 0, true, e)}
+                    // onClick={(e) => select(colIndex, 0, true, e)}
+                    onMouseUp={() => handleCardMouseUp(colIndex, 0, true)}
                   >
                     <div className={styles.holderInner}></div>
                   </div>
@@ -531,13 +552,26 @@ const Game = () => {
                           hintDestCard === colIndex &&
                           rowIndex === col.length - 1
                         }
+                        flashSrc={
+                          hintSrcCard &&
+                          hintSrcCard.col === colIndex &&
+                          hintSrcCard.row <= rowIndex
+                        }
                         selected={
                           selectedCard &&
                           rowIndex >= selectedCard.row &&
                           colIndex === selectedCard.col
+                            ? selectedCard.pos
+                            : false
                         }
-                        onClick={(e) => select(colIndex, rowIndex, display, e)}
-                        // onOutsideClick={() => setSelectedCard(null)}
+                        // onClick={(e) => select(colIndex, rowIndex, display)}
+                        onMouseDown={(x, y) =>
+                          select(colIndex, rowIndex, display, x, y)
+                        }
+                        onMouseUp={() => setSelectedCard(null)}
+                        onCardMouseUp={() =>
+                          handleCardMouseUp(colIndex, rowIndex, display)
+                        }
                       />
                     </div>
                   );
