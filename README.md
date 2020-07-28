@@ -4,6 +4,8 @@
 
 我使用了React在浏览器中重制了这个经典的小游戏，在游戏中按`h`键会显示提示，按`ctrl+z`撤销当前操作。每次操作（包括撤销和移动）都会扣1分，游戏初始分数500分，尝试使用最少的步数将所有的牌归位。
 
+![Game Screenshot](https://i.loli.net/2020/07/28/vBnbUZ43zEl6JSy.png)
+
 [Play Online](https://spider-iota.vercel.app)
 
 Powered by Vercel.
