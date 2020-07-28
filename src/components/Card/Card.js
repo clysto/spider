@@ -54,6 +54,7 @@ const Card = (props) => {
 
   const cProps = {
     className: classnames(styles.card, {
+      [styles.back]: !display,
       [styles.display]: display,
       [styles.selected]: selected,
       [styles.flash]: flash,

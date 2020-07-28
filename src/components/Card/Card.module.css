@@ -7,25 +7,42 @@
   position: relative;
   overflow: hidden;
   cursor: grab;
-  transition: box-shadow 100ms;
-  background-color: #ebb5b5;
+  transition: box-shadow 100ms, background-color 500ms, border 200ms;
+}
+
+.card.back {
+  position: relative;
+  background-color: #ffffff;
+}
+
+.card.back:after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  border-radius: 3px;
+  background-color: #193650;
 }
 
 .card.display {
-  background-color: #eeeeee;
+  background-color: #ffffff;
   background-image: none;
 }
 
-.card.flash {
-  box-shadow: 0 0 5px 5px rgba(255, 238, 0, 0.548);
+.card.display:hover {
+  background-color: #c0dbff !important;
 }
 
+.card.flash,
 .card.flashSrc {
-  box-shadow: 0 0 5px 5px rgba(0, 255, 149, 0.692);
+  box-shadow: 0 0 20px #ffac4e;
+  border: 2px solid #ffac4e;
 }
 
 .card.selected {
-  background-color: #c2d4e2 !important;
+  background-color: #c0dbff !important;
   pointer-events: none;
 }
 
@@ -46,7 +63,7 @@
 
 .text {
   display: flex;
-  font-size: 1.5em;
+  font-size: 1.4em;
   font-weight: bold;
   font-family: "Oleo Script", cursive;
 }

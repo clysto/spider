@@ -502,6 +502,7 @@ const Game = () => {
     <HotKeys handlers={keyHandlers} keyMap={keyMap} allowChanges={true}>
       <div className={styles.ui}>
         <div className={styles.topbar}>
+          <span className={styles.logo}>Spider Solitaire</span>
           <span className={styles.btn} onClick={undo}>
             撤销
           </span>
@@ -521,19 +522,27 @@ const Game = () => {
             提示
           </span>
           <div className="spacer"></div>
-          <div className={styles.score}>分数:{score}</div>
+          <div className={styles.score}>Score: {score}</div>
         </div>
         <div className={styles.game}>
           {cards.map((col, colIndex) => {
             return (
-              <div className={styles.column} key={colIndex}>
+              <div
+                className={classnames(styles.column, {
+                  [styles.column12]: col.length >= 12,
+                  [styles.column18]: col.length >= 18,
+                  [styles.column24]: col.length >= 24,
+                  [styles.column30]: col.length >= 30,
+                })}
+                key={colIndex}
+              >
                 <div className={styles.holderWrapper}>
                   <div
                     className={styles.holder}
-                    // onClick={(e) => select(colIndex, 0, true, e)}
                     onMouseUp={() => handleCardMouseUp(colIndex, 0, true)}
                   >
                     <div className={styles.holderInner}></div>
+                    {/* <div className={styles.holderBox}></div> */}
                   </div>
                 </div>
                 {col.map(({ point, suit, display, index }, rowIndex) => {
@@ -565,9 +574,11 @@ const Game = () => {
                             : false
                         }
                         // onClick={(e) => select(colIndex, rowIndex, display)}
-                        onMouseDown={(x, y) =>
-                          select(colIndex, rowIndex, display, x, y)
-                        }
+                        onMouseDown={(x, y) => {
+                          select(colIndex, rowIndex, display, x, y);
+                          setHintDestCard(null);
+                          setHintSrcCard(null);
+                        }}
                         onMouseUp={() => setSelectedCard(null)}
                         onCardMouseUp={() =>
                           handleCardMouseUp(colIndex, rowIndex, display)

@@ -10,8 +10,6 @@
 
 .topbar {
   display: flex;
-  background-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 5px 2px rgba(0, 0, 0, 0.35);
 }
 
 .game {
@@ -19,7 +17,8 @@
   padding: 1em;
   display: flex;
   flex-direction: row;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .column {
@@ -29,11 +28,38 @@
   align-items: center;
 }
 
+.column12 .cardWrapper.display {
+  height: 35px;
+}
+
+.column18 .cardWrapper.display {
+  height: 33px;
+}
+
+.column24 .cardWrapper.display {
+  height: 31px;
+}
+
+.column30 .cardWrapper.display {
+  height: 29px;
+}
+
 .holder {
   width: 120px;
-  border: 2px solid #909090;
+  border: 3px solid #ffac4e;
   border-radius: 5px;
   cursor: grab;
+  position: relative;
+}
+
+.holder:after {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  content: "";
+  border: 1px solid #ffac4e;
 }
 
 .holderInner {
@@ -47,7 +73,7 @@
 }
 
 .cardWrapper {
-  height: 10px;
+  height: 20px;
 }
 
 .cardWrapper.display {
@@ -67,7 +93,18 @@
   padding: 1em;
 }
 
+.logo {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  font-family: "Oleo Script", cursive;
+  color: #ffac4e;
+  padding: 1em;
+  font-size: 1.5em;
+}
+
 .btn {
+  transition: background-color 200ms;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -118,6 +155,5 @@
   color: #ffffff;
   padding: 1em;
   font-weight: bold;
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: "Oleo Script", cursive;
 }

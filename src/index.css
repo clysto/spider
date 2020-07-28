@@ -1,5 +1,5 @@
 :root {
-  --border: #0f1418;
+  --border: #000000;
   --bg: #0a141d;
 }
 
@@ -10,7 +10,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #000;
+  background-color: var(--bg);
 }
 
 code {
