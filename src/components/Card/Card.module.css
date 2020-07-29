@@ -2,6 +2,7 @@
   display: block;
   width: 120px;
   user-select: none;
+  -moz-user-select: none;
   border-radius: 5px;
   border: 2px solid var(--border);
   position: relative;
@@ -70,4 +71,10 @@
 
 .red {
   color: red;
+}
+
+@media screen and (max-height: 950px) {
+  .card {
+    width: 92px;
+  }
 }

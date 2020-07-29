@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import cardUpSound from "assets/up.mp3";
+import cardDownSound from "assets/down.mp3";
+import useSound from "use-sound";
 import OutsideClickHandler from "react-outside-click-handler";
 import { HotKeys } from "react-hotkeys";
 import classnames from "classnames";
@@ -182,6 +185,9 @@ const Game = () => {
   const [history, setHistory] = useState([]);
   const [cards, setCards] = useState([[], [], [], [], [], [], [], [], [], []]);
 
+  const [playUpSound] = useSound(cardUpSound);
+  const [playDownSound] = useSound(cardDownSound);
+
   useEffect(() => {
     const data = getGameData();
     if (data) {
@@ -249,19 +255,8 @@ const Game = () => {
     if (!eventCardDisplay) return;
     if (selectedCard === null && canMoveFrom(col, row)) {
       setSelectedCard({ col, row, pos: { x, y } });
+      playUpSound();
     }
-    // else if (
-    //   selectedCard !== null &&
-    //   selectedCard.col !== col &&
-    //   canMoveTo(col, cards[selectedCard.col][selectedCard.row].point)
-    // ) {
-    //   move(selectedCard.col, col, selectedCard.row);
-    //   setSelectedCard(null);
-    // } else if (canMoveFrom(col, row)) {
-    //   setSelectedCard({ col, row, pos: { x, y } });
-    // } else {
-    //   setSelectedCard(null);
-    // }
   };
 
   /**
@@ -392,6 +387,7 @@ const Game = () => {
       card.display = true;
       cards[i].push(card);
     }
+    playUpSound();
     setSelectedCard(null);
     setAllCards([...allCards]);
     setCards([...cards]);
@@ -498,6 +494,10 @@ const Game = () => {
     }
   };
 
+  const handleWindowMouseUp = useCallback(() => {
+    setSelectedCard(null);
+  }, []);
+
   return (
     <HotKeys handlers={keyHandlers} keyMap={keyMap} allowChanges={true}>
       <div className={styles.ui}>
@@ -573,16 +573,16 @@ const Game = () => {
                             ? selectedCard.pos
                             : false
                         }
-                        // onClick={(e) => select(colIndex, rowIndex, display)}
                         onMouseDown={(x, y) => {
                           select(colIndex, rowIndex, display, x, y);
                           setHintDestCard(null);
                           setHintSrcCard(null);
                         }}
-                        onMouseUp={() => setSelectedCard(null)}
-                        onCardMouseUp={() =>
-                          handleCardMouseUp(colIndex, rowIndex, display)
-                        }
+                        onMouseUp={handleWindowMouseUp}
+                        onCardMouseUp={() => {
+                          playDownSound();
+                          handleCardMouseUp(colIndex, rowIndex, display);
+                        }}
                       />
                     </div>
                   );

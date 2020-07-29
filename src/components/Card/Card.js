@@ -1,56 +1,39 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import classnames from "classnames";
 import styles from "./Card.module.css";
 
 const Card = (props) => {
   const { point, suit, onClick, onMouseUp, onCardMouseUp, onMouseDown } = props;
   const display = props.display || false;
-  const selected = props.selected || false;
   const flash = props.flash || false;
   const flashSrc = props.flashSrc || false;
-  const [startPosition, _setStartPosition] = useState(null);
   const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
+  const selected = props.selected || false;
 
   const isRed = suit === "♥" || suit === "♦";
 
-  const startPositionRef = useRef(startPosition);
-
-  const handleWindowMouseUp = useCallback(() => {
-    onMouseUp();
-    setStartPosition(null);
-    setCardPosition({ x: 0, y: 0 });
-    window.removeEventListener("mousemove", handleMouseMove);
-    window.removeEventListener("mouseup", handleWindowMouseUp);
-  }, []);
-
-  const handleMouseMove = useCallback(({ clientX, clientY }) => {
-    if (startPositionRef.current) {
-      setCardPosition({
-        x: clientX - startPositionRef.current.x,
-        y: clientY - startPositionRef.current.y,
-      });
-    }
-  }, []);
-
   useEffect(() => {
     if (selected) {
-      setStartPosition({ x: selected.x, y: selected.y });
-      window.addEventListener("mousemove", handleMouseMove);
+      // 开始拖动
+      const handleWindowMouseMove = ({ clientX, clientY }) => {
+        setCardPosition({
+          x: clientX - selected.x,
+          y: clientY - selected.y,
+        });
+      };
+      const handleWindowMouseUp = () => {
+        onMouseUp();
+      };
+      window.addEventListener("mousemove", handleWindowMouseMove);
       window.addEventListener("mouseup", handleWindowMouseUp);
+      return () => {
+        window.removeEventListener("mousemove", handleWindowMouseMove);
+        window.removeEventListener("mouseup", handleWindowMouseUp);
+      };
+    } else {
+      setCardPosition({ x: 0, y: 0 });
     }
-  }, [selected]);
-
-  useEffect(() => {
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleWindowMouseUp);
-    };
-  }, []);
-
-  const setStartPosition = (data) => {
-    startPositionRef.current = data;
-    _setStartPosition(data);
-  };
+  }, [selected, onMouseUp]);
 
   const cProps = {
     className: classnames(styles.card, {
@@ -70,8 +53,11 @@ const Card = (props) => {
   if (onClick) cProps.onClick = onClick;
 
   if (onMouseDown) {
-    cProps.onMouseDown = ({ clientX, clientY }) => {
-      onMouseDown(clientX, clientY);
+    cProps.onMouseDown = (e) => {
+      if (e.button === 0) {
+        const { clientX, clientY } = e;
+        onMouseDown(clientX, clientY);
+      }
     };
   }
 

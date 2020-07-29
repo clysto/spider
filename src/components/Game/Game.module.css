@@ -157,3 +157,10 @@
   font-weight: bold;
   font-family: "Oleo Script", cursive;
 }
+
+
+@media screen and (max-height: 950px) {
+  .holder {
+    width: 92px;
+  }
+}
